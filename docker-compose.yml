@@ -2,8 +2,8 @@ version: "2"
 
 services:
     countdown:
-        image: yoanisgil/countdown-python
         build: . 
+        container_name: countdown
         environment:
             - NUM_WORKERS=1
             - APP_NAME=countdown
@@ -15,7 +15,19 @@ services:
             - PYTHONUNBUFFERED=1
             - DB_DIR=/var/lib/countdown
         ports:
-            - "5000:80/tcp"
+            - "8000:80/tcp"
         volumes:
             - ./data:/var/lib/countdown
-
+        depends_on:
+            - rsyslog
+        logging:
+            # https://docs.docker.com/config/containers/logging/syslog/
+            driver: syslog
+            options: 
+                syslog-address: "udp://localhost:5514"
+                tag: "countdown"
+    rsyslog:
+        image: voxxit/rsyslog 
+        container_name: rsyslog
+        ports:
+            - "5514:514/udp"
